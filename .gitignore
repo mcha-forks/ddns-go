@@ -1,33 +1,33 @@
-# Compiled Object files, Static and Dynamic libs (Shared Objects)
-*.o
-*.a
-*.so
-/ddns-go
-__*
+# Created by https://www.toptal.com/developers/gitignore/api/go
+# Edit at https://www.toptal.com/developers/gitignore?templates=go
 
-# Folders
-_obj
-_test
-.vagrant
-releases
-tmp
-/.idea/
-vendor/
-/dist
-
-# Architecture specific extensions/prefixes
-trace.out
-*.out
-.DS_Store
-_testmain.go
-
+### Go ###
+# If you prefer the allow list template instead of the deny list, see community template:
+# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
+#
+# Binaries for programs and plugins
 *.exe
-*.test
-*.prof
-profile.cov
-coverage.html
-/go.sum
+*.exe~
+*.dll
+*.so
+*.dylib
+/dnsd
 
-# Emacs backup files
-*~
-.*~
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Go workspace file
+go.work
+
+### Go Patch ###
+/vendor/
+/Godeps/
+
+# End of https://www.toptal.com/developers/gitignore/api/go
+
+/.idea/
+/.vscode/
+/dist

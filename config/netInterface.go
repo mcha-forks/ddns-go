@@ -5,14 +5,11 @@ import (
 	"net"
 )
 
-// NetInterface 本机网络
 type NetInterface struct {
 	Name    string
 	Address []string
 }
 
-// GetNetInterface 获得网卡地址
-// 返回ipv4, ipv6地址
 func GetNetInterface() (ipv4NetInterfaces []NetInterface, ipv6NetInterfaces []NetInterface, err error) {
 	allNetInterfaces, err := net.Interfaces()
 	if err != nil {
@@ -26,8 +23,8 @@ func GetNetInterface() (ipv4NetInterfaces []NetInterface, ipv6NetInterfaces []Ne
 	for i := 0; i < len(allNetInterfaces); i++ {
 		if (allNetInterfaces[i].Flags & net.FlagUp) != 0 {
 			addrs, _ := allNetInterfaces[i].Addrs()
-			ipv4 := []string{}
-			ipv6 := []string{}
+			var ipv4 []string
+			var ipv6 []string
 
 			for _, address := range addrs {
 				if ipnet, ok := address.(*net.IPNet); ok && ipnet.IP.IsGlobalUnicast() {

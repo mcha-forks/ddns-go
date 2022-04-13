@@ -1,7 +1,7 @@
 package config
 
 import (
-	"ddns-go/util"
+	"dnsd/util"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -21,11 +21,11 @@ type updateStatusType string
 
 const (
 	// UpdatedNothing 未改变
-	UpdatedNothing updateStatusType = "未改变"
+	UpdatedNothing updateStatusType = "not changed"
 	// UpdatedFailed 更新失败
-	UpdatedFailed = "失败"
+	UpdatedFailed = "failed"
 	// UpdatedSuccess 更新成功
-	UpdatedSuccess = "成功"
+	UpdatedSuccess = "success"
 )
 
 // ExecWebhook 添加或更新IPv4/IPv6记录
@@ -48,28 +48,27 @@ func ExecWebhook(domains *Domains, conf *Config) {
 		requestURL := replacePara(domains, conf.WebhookURL, v4Status, v6Status)
 		u, err := url.Parse(requestURL)
 		if err != nil {
-			log.Println("Webhook配置中的URL不正确")
+			log.Println("[webhook] not a valid url")
 			return
 		}
 		req, err := http.NewRequest(method, fmt.Sprintf("%s://%s%s?%s", u.Scheme, u.Host, u.Path, u.Query().Encode()), strings.NewReader(postPara))
 		if err != nil {
-			log.Println("创建Webhook请求异常, Err:", err)
+			log.Println("[webhook] request failed:", err)
 			return
 		}
-		req.Header.Add("content-type", contentType)
+		req.Header.Add("Content-Type", contentType)
 
 		clt := util.CreateHTTPClient()
 		resp, err := clt.Do(req)
 		body, err := util.GetHTTPResponseOrg(resp, requestURL, err)
 		if err == nil {
-			log.Println(fmt.Sprintf("Webhook调用成功, 返回数据: %s", string(body)))
+			log.Println("[webhook] success: ", string(body))
 		} else {
-			log.Println(fmt.Sprintf("Webhook调用失败，Err：%s", err))
+			log.Println("[webhook] failed: ", err)
 		}
 	}
 }
 
-// getDomainsStr 用逗号分割域名
 func getDomainsStatus(domains []*Domain) updateStatusType {
 	successNum := 0
 	for _, v46 := range domains {

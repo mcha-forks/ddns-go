@@ -1,7 +1,7 @@
 package config
 
 import (
-	"ddns-go/util"
+	"dnsd/util"
 	"log"
 	"strings"
 )
@@ -43,15 +43,6 @@ func (d Domain) GetFullDomain() string {
 	return "@" + "." + d.DomainName
 }
 
-// GetSubDomain 获得子域名，为空返回@
-// 阿里云，dnspod需要
-func (d Domain) GetSubDomain() string {
-	if d.SubDomain != "" {
-		return d.SubDomain
-	}
-	return "@"
-}
-
 // GetNewIp 接口/网卡获得ip并校验用户输入的域名
 func (domains *Domains) GetNewIp(conf *Config) {
 	domains.Ipv4Domains = checkParseDomains(conf.Ipv4.Domains)
@@ -69,7 +60,7 @@ func (domains *Domains) GetNewIp(conf *Config) {
 			if getIPv4FailTimes == 3 {
 				domains.Ipv4Domains[0].UpdateStatus = UpdatedFailed
 			}
-			log.Println("未能获取IPv4地址, 将不会更新")
+			log.Println("[ipv4] cannot retrieve address")
 		}
 	}
 
@@ -85,7 +76,7 @@ func (domains *Domains) GetNewIp(conf *Config) {
 			if getIPv6FailTimes == 3 {
 				domains.Ipv6Domains[0].UpdateStatus = UpdatedFailed
 			}
-			log.Println("未能获取IPv6地址, 将不会更新")
+			log.Println("[ipv6] cannot retrieve address")
 		}
 	}
 
@@ -100,7 +91,7 @@ func checkParseDomains(domainArr []string) (domains []*Domain) {
 			sp := strings.Split(domainStr, ".")
 			length := len(sp)
 			if length <= 1 {
-				log.Println(domainStr, "域名不正确")
+				log.Println(domainStr, " is not valid")
 				continue
 			}
 			// 处理域名
@@ -132,7 +123,7 @@ func (domains *Domains) GetNewIpResult(recordType string) (ipAddr string, retDom
 		if util.Ipv6Cache.Check(domains.Ipv6Addr) {
 			return domains.Ipv6Addr, domains.Ipv6Domains
 		} else {
-			log.Printf("IPv6未改变，将等待 %d 次后与DNS服务商进行比对\n", util.MaxTimes-util.Ipv6Cache.Times+1)
+			log.Println("[ipv6] unchanged, keeping cache for ", util.MaxTimes-util.Ipv6Cache.Times+1, " times more")
 			return "", domains.Ipv6Domains
 		}
 	}
@@ -140,7 +131,7 @@ func (domains *Domains) GetNewIpResult(recordType string) (ipAddr string, retDom
 	if util.Ipv4Cache.Check(domains.Ipv4Addr) {
 		return domains.Ipv4Addr, domains.Ipv4Domains
 	} else {
-		log.Printf("IPv4未改变，将等待 %d 次后与DNS服务商进行比对\n", util.MaxTimes-util.Ipv4Cache.Times+1)
+		log.Println("[ipv4] unchanged, keeping cache for ", util.MaxTimes-util.Ipv4Cache.Times+1, " times more")
 		return "", domains.Ipv4Domains
 	}
 }

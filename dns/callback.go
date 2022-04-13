@@ -1,10 +1,9 @@
 package dns
 
 import (
-	"ddns-go/config"
-	"ddns-go/util"
+	"dnsd/config"
+	"dnsd/util"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -48,13 +47,13 @@ func (cb *Callback) addUpdateDomainRecords(recordType string) {
 
 	if recordType == "A" {
 		if lastIpv4 == ipAddr {
-			log.Println("你的IPv4未变化, 未触发Callback")
+			log.Println("[callback] [ipv4] unchanged, skipping update")
 			return
 		}
 		lastIpv4 = ipAddr
 	} else {
 		if lastIpv6 == ipAddr {
-			log.Println("你的IPv6未变化, 未触发Callback")
+			log.Println("[callback] [ipv6] unchanged, skipping update")
 			return
 		}
 		lastIpv6 = ipAddr
@@ -74,24 +73,24 @@ func (cb *Callback) addUpdateDomainRecords(recordType string) {
 		requestURL := replacePara(cb.DNSConfig.ID, ipAddr, domain, recordType, cb.TTL)
 		u, err := url.Parse(requestURL)
 		if err != nil {
-			log.Println("Callback的URL不正确")
+			log.Println("[callback] invalid url")
 			return
 		}
 		req, err := http.NewRequest(method, u.String(), strings.NewReader(postPara))
 		if err != nil {
-			log.Println("创建Callback请求异常, Err:", err)
+			log.Println("[callback] error creating request:", err)
 			return
 		}
-		req.Header.Add("content-type", contentType)
+		req.Header.Add("Content-Type", contentType)
 
 		clt := util.CreateHTTPClient()
 		resp, err := clt.Do(req)
 		body, err := util.GetHTTPResponseOrg(resp, requestURL, err)
 		if err == nil {
-			log.Println(fmt.Sprintf("Callback调用成功, 返回数据: %s", string(body)))
+			log.Println("[callback] success: ", string(body))
 			domain.UpdateStatus = config.UpdatedSuccess
 		} else {
-			log.Println(fmt.Sprintf("Callback调用失败，Err：%s", err))
+			log.Println("[callback] failed: ", err)
 			domain.UpdateStatus = config.UpdatedFailed
 		}
 	}
